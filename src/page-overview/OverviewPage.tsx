@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 import Colors from "../design-system/Colors";
 import ImpactDashboard from "../impact-dashboard";
+import MultiFacilityImpactDashboardContainer from "../multi-facility-impact-dashboard";
 import SiteHeader from "../site-header/SiteHeader";
 
 const Headline = styled.h1`
@@ -14,7 +15,7 @@ const Headline = styled.h1`
 
 const OverviewPageDiv = styled.div``;
 
-const OverviewPage: React.FC = () => {
+const OverviewPage: React.FC = (props) => {
   return (
     <OverviewPageDiv>
       <div className="font-body text-green min-h-screen tracking-normal w-full">
@@ -24,7 +25,11 @@ const OverviewPage: React.FC = () => {
             <Headline>
               Customize the COVID-19 Incarceration Model for Your Facilities
             </Headline>
-            <ImpactDashboard />
+            {
+              props.mf
+                ? <MultiFacilityImpactDashboardContainer />
+                : <ImpactDashboard />
+            }
           </main>
         </div>
       </div>

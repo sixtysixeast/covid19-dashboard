@@ -19,7 +19,7 @@ const PageList: PageInfo[] = [
   {
     path: "/",
     title: getPageTitle(),
-    isPrivate: true,
+    isPrivate: false,
     contents: <OverviewPage />,
   },
   {
@@ -27,6 +27,12 @@ const PageList: PageInfo[] = [
     title: getPageTitle("Get Involved"),
     isPrivate: false,
     contents: <GetInvolvedPage />,
+  },
+  {
+    path: "/mf",
+    title: getPageTitle(),
+    isPrivate: false,
+    contents: <OverviewPage mf={true}/>,
   },
   {
     path: "/unsupported-browser",

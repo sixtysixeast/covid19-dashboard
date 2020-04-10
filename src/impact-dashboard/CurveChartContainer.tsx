@@ -9,6 +9,7 @@ import CurveChart from "./CurveChart";
 import { useEpidemicModelState } from "./EpidemicModelContext";
 
 interface Props {
+  chartHeight?: number;
   markColors: MarkColors;
 }
 
@@ -20,7 +21,7 @@ function combinePopulations(data: CurveData, columnIndex: number) {
   ).map(([incarcerated, staff]) => incarcerated + staff);
 }
 
-const CurveChartContainer: React.FC<Props> = ({ markColors }) => {
+const CurveChartContainer: React.FC<Props> = ({ chartHeight, markColors }) => {
   const modelData = useEpidemicModelState();
   // TODO: could this be stored on the context instead for reuse?
   const projectionData = calculateCurves(modelData);
@@ -36,6 +37,7 @@ const CurveChartContainer: React.FC<Props> = ({ markColors }) => {
     <Loading />
   ) : (
     <CurveChart
+      chartHeight={chartHeight}
       curveData={curveData}
       hospitalBeds={modelData.hospitalBeds}
       markColors={markColors}
