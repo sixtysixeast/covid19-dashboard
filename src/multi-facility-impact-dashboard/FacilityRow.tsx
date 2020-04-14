@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import Colors from "../design-system/Colors";
 
-import { EpidemicModelProvider } from "../impact-dashboard/EpidemicModelContext";
+import { useEpidemicModelState } from "./MultiFacilityEpidemicModelContext";
+
 import CurveChartContainer from "../impact-dashboard/CurveChartContainer";
 
 const markColors = {
@@ -13,10 +14,16 @@ const markColors = {
 };
 
 const FacilityRow: React.FC = (props) => {
-  const {
-    facilityName,
-    confirmedCases
-  } = props.facility
+  // const {
+  //   facilityName,
+  //   confirmedCases
+  // } = props.facility
+
+  const facilityName = "Blah"
+  const confirmedCases = 123
+  console.log("facility row props: " + JSON.stringify(props))
+
+  const modelData = useEpidemicModelState();
 
   return (
     <div>
@@ -42,9 +49,7 @@ const FacilityRow: React.FC = (props) => {
           </div>
         </div>
         <div className="w-3/5">
-          <EpidemicModelProvider>
-            <CurveChartContainer markColors={markColors} chartHeight={200} />
-          </EpidemicModelProvider>
+          <CurveChartContainer modelData={modelData} markColors={markColors} chartHeight={200} />
         </div>
       </div>
     </div>
