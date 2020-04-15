@@ -101,8 +101,10 @@ function buildHospitalizedRow(data: ndarray): TableRow {
   return row;
 }
 
-const ImpactProjectionTableContainer: React.FC = () => {
-  const modelData = useEpidemicModelState();
+const ImpactProjectionTableContainer: React.FC = ({ modelData }) => {
+
+  // const modelData = useEpidemicModelState();
+
   const { hospitalBeds } = modelData;
   // TODO: could this be stored on the context instead for reuse?
   const { incarcerated, staff } = calculateCurves(modelData);

@@ -21,14 +21,14 @@ const ModelSideBar: React.FC = () => {
           <div className="flex justify-between items-baseline">
             <h3>Daily Reports</h3>
             <div>
-              <label for="daily_reports" className="mr-3">Off</label><input type="checkbox" id="daily_reports" />
+              <label htmlFor="daily_reports" className="mr-3">Off</label><input type="checkbox" id="daily_reports" />
             </div>
           </div>
           <div className="mt-5 mb-5 border-b border-gray-300"></div>
           <div className="flex justify-between items-baseline">
             <h3>Data Sharing</h3>
             <div>
-              <label for="data_sharing" className="mr-3">Off</label><input type="checkbox" id="data_sharing" checked />
+              <label htmlFor="data_sharing" className="mr-3">Off</label><input type="checkbox" id="data_sharing" defaultChecked />
             </div>
           </div>
           <div className="mt-5 mb-5 border-b border-gray-300"></div>

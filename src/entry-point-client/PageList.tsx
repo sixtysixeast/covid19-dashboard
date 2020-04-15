@@ -19,7 +19,7 @@ const PageList: PageInfo[] = [
   {
     path: "/",
     title: getPageTitle(),
-    isPrivate: false,
+    isPrivate: true,
     contents: <OverviewPage />,
   },
   {

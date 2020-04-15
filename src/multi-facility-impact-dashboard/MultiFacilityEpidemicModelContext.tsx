@@ -8,6 +8,11 @@ import React, { useEffect } from "react";
 import { getSavedState, saveState } from "../database";
 import useQueryParams, { QueryParams } from "../hooks/useQueryParams";
 
+import {
+ facilities 
+} from "./assumedDataModelExample"
+
+
 type CountyLevelRecord = {
   hospitalBeds: number;
   totalIncarceratedPopulation: number;
@@ -116,62 +121,27 @@ interface ResetPayload {
   countyName?: string;
 }
 
-function epidemicModelReducer(
-  state: EpidemicModelState,
-  action: Action,
-): EpidemicModelState {
-  switch (action.type) {
-    case "update":
-      return {
-        "stateCode": "US Total",
-        "countyName": "Total",
-        "rateOfSpreadFactor": "high", "usePopulationSubsets": true,
-        "facilityOccupancyPct": 1,
-        "facilityDormitoryPct" :0.15,
-        "hospitalBeds": 747890,
-        "countyLevelDataLoading": false,
-        "countyLevelData": {},
-        "totalIncarcerated": 2070331,
-        "ageUnknownPopulation": 2070331,
-        "ageUnknownCases": 25901,
-        "confirmedCases": 25901,
-        "staffCases": 0,
-        "staffPopulation": 0
-      }
-  }
-}
-
-// estimated ratio of confirmed cases to actual cases
-const caseReportingRate = 0.14;
-
 function MultiFacilityEpidemicModelProvider({ children }: EpidemicModelProviderProps) {
-  const [state, dispatch] = React.useReducer(
-    epidemicModelReducer,
-    {},
-  );
+  console.log("in the provider...")
 
-  // fetch from external datasource
-  React.useEffect(
+  const [facilitiesList, setFacilitiesList] = React.useState();
+
+  // I feel like this isn't quite right...
+
+  useEffect(
     () => {
       async function effect() {
-        try {
-          dispatch({ type: "update" });
-        } catch (error) {
-          console.log("Erroring out???")
-          console.error(error);
-        }
+        console.log("facilities in use effect: " + JSON.stringify(facilities));
+        setFacilitiesList(facilities);
       }
       effect();
-    },
-    // we only want to run this once, on initial mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    }, [facilitiesList]
   );
 
-  console.log("state: " + JSON.stringify(state))
+  console.log("facilitiesList: " + JSON.stringify(facilitiesList))
 
   return (
-    <EpidemicModelStateContext.Provider value={state}>
+    <EpidemicModelStateContext.Provider value={facilitiesList}>
       {children}
     </EpidemicModelStateContext.Provider>
   );

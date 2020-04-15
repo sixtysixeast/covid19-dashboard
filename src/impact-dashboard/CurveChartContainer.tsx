@@ -6,6 +6,7 @@ import { getAllValues, getColView } from "../infection-model/matrixUtils";
 import { seirIndex } from "../infection-model/seir";
 import { MarkColors } from "./ChartArea";
 import CurveChart from "./CurveChart";
+import { useEpidemicModelState } from "./EpidemicModelContext";
 
 interface Props {
   chartHeight?: number;
@@ -21,6 +22,8 @@ function combinePopulations(data: CurveData, columnIndex: number) {
 }
 
 const CurveChartContainer: React.FC<Props> = ({ chartHeight, markColors, modelData }) => {
+  // const modelData = useEpidemicModelState();
+
   // TODO: could this be stored on the context instead for reuse?
   const projectionData = calculateCurves(modelData);
   // merge and filter the curve data to only what we need for the chart
