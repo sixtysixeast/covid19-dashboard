@@ -7,30 +7,19 @@ import {
 
 import Loading from "../design-system/Loading";
 
-import { useFacilities, useFB } from "./hooks"
-
-import { MultiFacilityEpidemicModelProvider } from "./MultiFacilityEpidemicModelContext";
+import { useFacilities } from "./hooks"
 
 const MultiFacilityImpactDashboard: React.FC = () => {
-  const facilities = useFacilities()
-
-  const modelInputs = useFB();
-
-  console.log("modelInputs: " + JSON.stringify(modelInputs))
+  const facilities = useFacilities();
 
   return (
     <div className="h-screen flex">
-      {/* Disabled for the first version of the MF experience
-        <ModelSideBar />
-      */}
-      <ModelSideBar />
-
       <div className="flex flex-col flex-1 pb-6 pl-8">
         <SectionHeader>+ Add Facilities</SectionHeader>
         <FacilitiesHeader />
         { facilities.loading ? <Loading /> :
-          Object.keys(facilities.data).map((facilityId) => {
-            return <FacilityRow key={facilityId} id={facilityId} />
+          facilities.data.map((facility, index) => {
+            return <FacilityRow key={index} facility={facility} />
           })
         }
       </div>

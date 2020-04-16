@@ -14,6 +14,8 @@ import { prepareForStorage, prepareFromStorage } from "./utils";
 const tokenExchangeEndpoint =
   "https://us-central1-c19-backend.cloudfunctions.net/getFirebaseToken";
 const modelInputsCollectionId = "model_inputs";
+const scenariosCollectionId = "scenarios";
+const facilitiesCollectionId = "facilities";
 
 // Note: None of these are secrets.
 let firebaseConfig = {
@@ -58,6 +60,10 @@ const authenticate = async () => {
   await firebase.auth().signInWithCustomToken(customToken);
 };
 
+const firebaseUserId = () => {
+  return (firebase.auth().currentUser || {}).uid  
+}
+
 const getInputModelsDocRef = async () => {
   await authenticate();
 
@@ -68,7 +74,7 @@ const getInputModelsDocRef = async () => {
   const db = firebase.firestore();
   return db
     .collection(modelInputsCollectionId)
-    .doc((firebase.auth().currentUser || {}).uid);
+    .doc(firebaseUserId());
 };
 
 // TODO: Guard against the possibility of autosaves completing out of order.
@@ -113,10 +119,6 @@ export const getSavedState = async (): Promise<EpidemicModelPersistent | null> =
   }
 };
 
-// Your user id is:  auth0|5e8cb39260ce080ca93e8ffc
-
-const scenarios = "scenarios";
-
 const getBaselineScenario = async () => {
   await authenticate();
 
@@ -125,14 +127,16 @@ const getBaselineScenario = async () => {
   }
 
   const db = firebase.firestore();
-  const query = db.collection(scenarios).where("baseline", "==", true)
+  const query = db
+    .collection(scenariosCollectionId)
+    .where("baseline", "==", true)
+
   const results = await query.get()
 
-  // Gotta be a better way to do this...
+  // There's got to be a better way to do this
   const baselineScenario = results.docs.map((doc) => {
     const scenario = doc.data()
-    const userId = (firebase.auth().currentUser || {}).uid
-    if(scenario.roles[userId] ==  "owner") {
+    if(scenario.roles[firebaseUserId()] ==  "owner") {
       return doc;
     }
   }).shift();
@@ -146,15 +150,17 @@ export const getFacilities = async () => {
 
     if (!baselineScenario) return null;
 
-    const facilitiesResults = await baselineScenario.collection("facilities").get()    
+    const facilitiesResults =
+      await baselineScenario.collection("facilities").get()    
 
     const facilities = facilitiesResults.docs.map(doc => doc.data())
 
-    return facilities
+    return facilities;
   } catch (error) {
     console.error(
       "Encountered error while attempting to retrieve saved state:",
     );
+
     console.error(error);
 
     return null;

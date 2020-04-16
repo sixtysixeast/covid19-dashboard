@@ -2,12 +2,8 @@ import styled from "styled-components";
 import Colors from "../design-system/Colors";
 import Loading from "../design-system/Loading";
 
-import { useEpidemicModelState } from "./MultiFacilityEpidemicModelContext";
-
 import CurveChartContainer from "../impact-dashboard/CurveChartContainer";
 import ImpactProjectionTable from "../impact-dashboard/ImpactProjectionTableContainer";
-
-import { useFacility } from "./hooks"
 
 const markColors = {
   exposed: Colors.green,
@@ -18,18 +14,12 @@ const markColors = {
 };
 
 const FacilityRow: React.FC = (props) => {
-  const facility = useFacility(props.id)
-
-  if(facility.loading) {
-    return <Loading />;
-  }
-
   const {
     name,
-    confirmedCases
-  } = facility.data
+    model_inputs
+  } = props.facility
 
-  const modelData = facility.data;
+  const confirmedCases = model_inputs.confirmedCases
 
   return (
     <div>
@@ -55,7 +45,7 @@ const FacilityRow: React.FC = (props) => {
           </div>
         </div>
         <div className="w-3/5">
-          <CurveChartContainer modelData={modelData} markColors={markColors} chartHeight={200} />
+          <CurveChartContainer modelData={model_inputs} markColors={markColors} chartHeight={200} />
           {/* <ImpactProjectionTable modelData={modelData} /> */}
         </div>
       </div>
