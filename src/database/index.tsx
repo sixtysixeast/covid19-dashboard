@@ -112,3 +112,48 @@ export const getSavedState = async (): Promise<EpidemicModelPersistent | null> =
     return null;
   }
 };
+
+
+
+// Your user id is:  auth0|5e8cb39260ce080ca93e8ffc
+
+const facilitiesCollectionId = "facilities";
+
+const getFacilitiesDocRef = async () => {
+  await authenticate();
+
+  if (!firebase.auth().currentUser) {
+    throw new Error("Firebase user unexpectedly not set");
+  }
+
+  const db = firebase.firestore();
+  return db.collection(facilitiesCollectionId).doc("YrUWE6heXya2C042XASv");
+};
+
+export const getFacilities = async () => {
+  try {
+    const docRef = await getFacilitiesDocRef();
+
+    if (!docRef) return null;
+
+    const doc = await docRef.get();
+
+    console.log("doc: " + JSON.stringify(doc.keys)
+
+
+
+
+    if (!doc.exists) return null;
+
+    const data = doc.data();
+
+    return data;
+  } catch (error) {
+    console.error(
+      "Encountered error while attempting to retrieve saved state:",
+    );
+    console.error(error);
+
+    return null;
+  }
+};

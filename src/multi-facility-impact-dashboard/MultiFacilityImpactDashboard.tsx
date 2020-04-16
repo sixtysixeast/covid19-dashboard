@@ -7,12 +7,16 @@ import {
 
 import Loading from "../design-system/Loading";
 
-import { useFacilities } from "./hooks"
+import { useFacilities, useFB } from "./hooks"
 
 import { MultiFacilityEpidemicModelProvider } from "./MultiFacilityEpidemicModelContext";
 
 const MultiFacilityImpactDashboard: React.FC = () => {
   const facilities = useFacilities()
+
+  const modelInputs = useFB();
+
+  console.log("modelInputs: " + JSON.stringify(modelInputs))
 
   return (
     <div className="h-screen flex">
