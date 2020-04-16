@@ -113,13 +113,11 @@ export const getSavedState = async (): Promise<EpidemicModelPersistent | null> =
   }
 };
 
-
-
 // Your user id is:  auth0|5e8cb39260ce080ca93e8ffc
 
-const facilitiesCollectionId = "facilities";
+const scenarios = "scenarios";
 
-const getFacilitiesDocRef = async () => {
+const getBaselineScenario = async () => {
   await authenticate();
 
   if (!firebase.auth().currentUser) {
@@ -127,27 +125,32 @@ const getFacilitiesDocRef = async () => {
   }
 
   const db = firebase.firestore();
-  return db.collection(facilitiesCollectionId).doc("YrUWE6heXya2C042XASv");
+  const query = db.collection(scenarios).where("baseline", "==", true)
+  const results = await query.get()
+
+  // Gotta be a better way to do this...
+  const baselineScenario = results.docs.map((doc) => {
+    const scenario = doc.data()
+    const userId = (firebase.auth().currentUser || {}).uid
+    if(scenario.roles[userId] ==  "owner") {
+      return doc;
+    }
+  }).shift();
+
+  return baselineScenario.ref;
 };
 
 export const getFacilities = async () => {
   try {
-    const docRef = await getFacilitiesDocRef();
+    const baselineScenario = await getBaselineScenario();
 
-    if (!docRef) return null;
+    if (!baselineScenario) return null;
 
-    const doc = await docRef.get();
+    const facilitiesResults = await baselineScenario.collection("facilities").get()    
 
-    console.log("doc: " + JSON.stringify(doc.keys)
+    const facilities = facilitiesResults.docs.map(doc => doc.data())
 
-
-
-
-    if (!doc.exists) return null;
-
-    const data = doc.data();
-
-    return data;
+    return facilities
   } catch (error) {
     console.error(
       "Encountered error while attempting to retrieve saved state:",
