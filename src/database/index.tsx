@@ -182,6 +182,31 @@ export const getBaselineScenarioRef = async (): Promise<firebase.firestore.Docum
   return results.docs[0].ref;
 };
 
+export const getScenario = async (
+  scenarioId: string,
+): Promise<Scenario | null> => {
+  try {
+    const db = await getDb();
+
+    const scenarioResult = await db
+      .collection(scenariosCollectionId)
+      .doc(scenarioId)
+      .get();
+
+    const scenario = scenarioResult.data() as Scenario;
+    scenario.id = scenarioResult.id;
+
+    return scenario;
+  } catch (error) {
+    console.error(
+      `Encountered error while attempting to retrieve the scenario (${scenarioId}):`,
+    );
+    console.error(error);
+
+    return null;
+  }
+};
+
 export const saveScenario = async (
   scenario: any,
 ): Promise<firebase.firestore.DocumentReference | void> => {
@@ -279,15 +304,19 @@ export const createBaselineScenario = async (): Promise<firebase.firestore.Docum
   }
 };
 
-export const getFacilities = async (): Promise<Array<Facility> | null> => {
+export const getFacilities = async (
+  scenarioId: string,
+): Promise<Array<Facility> | null> => {
   try {
-    // Cheating for launch expediency.
-    // See: https://github.com/Recidiviz/covid19-dashboard/issues/129
-    const baselineScenarioRef = await getBaselineScenarioRef();
+    const scenario = await getScenario(scenarioId);
 
-    if (!baselineScenarioRef) return null;
+    if (!scenario) return null;
 
-    const facilitiesResults = await baselineScenarioRef
+    const db = await getDb();
+
+    const facilitiesResults = await db
+      .collection(scenariosCollectionId)
+      .doc(scenario.id)
       .collection(facilitiesCollectionId)
       .orderBy("name")
       .get();

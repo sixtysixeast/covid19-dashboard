@@ -88,7 +88,9 @@ const MultiFacilityImpactDashboard: React.FC<Props> = ({
   }, []);
 
   async function fetchFacilities() {
-    const facilitiesData = await getFacilities();
+    if (!scenario?.data?.id) return;
+
+    const facilitiesData = await getFacilities(scenario.data.id);
 
     if (facilitiesData) {
       setFacilities({
@@ -100,7 +102,7 @@ const MultiFacilityImpactDashboard: React.FC<Props> = ({
 
   useEffect(() => {
     fetchFacilities();
-  }, []);
+  }, [scenario.data?.id]);
 
   const openAddFacilityPage = () => {
     setFacility(null);
