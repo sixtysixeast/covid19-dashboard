@@ -19,6 +19,7 @@ type Timestamp = {
 export type Facilities = Facility[];
 
 export type Scenario = {
+  id?: string;
   name: string;
   baseline: boolean;
   dataSharing: boolean;
