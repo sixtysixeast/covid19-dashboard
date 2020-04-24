@@ -101,7 +101,7 @@ const handleSubClick = (fn?: Function, ...args: any[]) => {
 };
 
 interface Props {
-  deleteFn: (id: string) => void;
+  deleteFn: (scenarioId: string, facilityId: string) => void;
   facility: Facility;
   scenarioId: string;
 }
@@ -130,11 +130,7 @@ const FacilityRow: React.FC<Props> = ({
   const closeDeleteModal = handleSubClick(updateShowDeleteModal, false);
 
   const removeFacility = handleSubClick(async () => {
-    // In this context id should always be present, but TypeScript
-    // is complaining so I'm adding this check to appease it.
-    if (id) {
-      await deleteFn(id);
-    }
+    await deleteFn(scenarioId, id);
     updateShowDeleteModal(false);
   });
 

@@ -457,13 +457,14 @@ export const saveFacility = async (
   }
 };
 
-export const deleteFacility = async (facilityId: string): Promise<void> => {
+export const deleteFacility = async (
+  scenarioId: string,
+  facilityId: string,
+): Promise<void> => {
   try {
-    // Cheating for launch expediency.
-    // See: https://github.com/Recidiviz/covid19-dashboard/issues/129
-    const baselineScenarioRef = await getBaselineScenarioRef();
+    const scenarioRef = await getScenarioRef(scenarioId);
 
-    if (!baselineScenarioRef) return;
+    if (!scenarioRef) return;
 
     // Delete all of the modelVersions associated with a facility.  Technically,
     // this is not the recommended approach for the web*, but we should be ok
@@ -472,7 +473,7 @@ export const deleteFacility = async (facilityId: string): Promise<void> => {
     //
     // * https://firebase.google.com/docs/firestore/manage-data/delete-data#web_2
     // ** https://github.com/Recidiviz/covid19-dashboard/issues/191
-    const facilityDocRef = await baselineScenarioRef
+    const facilityDocRef = await scenarioRef
       .collection(facilitiesCollectionId)
       .doc(facilityId);
 

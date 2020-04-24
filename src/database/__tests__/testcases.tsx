@@ -187,7 +187,7 @@ saveFacility(scenarioId, {
 
 // 6.  Delete a facility
 
-deleteFacility("EXISTING FACILITY ID");
+deleteFacility(scenarioId, "EXISTING FACILITY ID");
 
 // Works as expected ✅
 
@@ -202,6 +202,6 @@ saveFacility(scenarioId, {
 
 // 8.  Attempt to delete a non-existent facility
 
-deleteFacility("NON-EXISTENT ID");
+deleteFacility(scenarioId, "NON-EXISTENT ID");
 
 // Firestore treats this as a no-op ✅

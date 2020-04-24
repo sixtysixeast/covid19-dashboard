@@ -81,8 +81,8 @@ const MultiFacilityImpactDashboard: React.FC = () => {
     history.push("/facility");
   };
 
-  const deleteFn = async (id: string) => {
-    await deleteFacility(id);
+  const deleteFn = async (scenarioId: string, facilityId: string) => {
+    await deleteFacility(scenarioId, facilityId);
     fetchFacilities();
   };
 
