@@ -337,36 +337,6 @@ export const getFacilities = async (
   }
 };
 
-export const getFacility = async (
-  facilityId: string,
-): Promise<Facility | null> => {
-  try {
-    // Cheating for launch expediency.
-    // See: https://github.com/Recidiviz/covid19-dashboard/issues/129
-    const baselineScenarioRef = await getBaselineScenarioRef();
-
-    if (!baselineScenarioRef) return null;
-
-    const facilityResult = await baselineScenarioRef
-      .collection(facilitiesCollectionId)
-      .doc(facilityId)
-      .get();
-
-    const facility = facilityResult.data() as Facility;
-    facility.id = facilityResult.id;
-
-    return facility;
-  } catch (error) {
-    console.error(
-      `Encountered error while attempting to retrieve the facility (${facilityId}):`,
-    );
-
-    console.error(error);
-
-    return null;
-  }
-};
-
 /**
  * Please note the following usage patterns and provide data to this method
  * accordingly when updating a facility:
