@@ -103,11 +103,13 @@ const handleSubClick = (fn?: Function, ...args: any[]) => {
 interface Props {
   deleteFn: (id: string) => void;
   facility: Facility;
+  scenarioId: string;
 }
 
 const FacilityRow: React.FC<Props> = ({
   deleteFn,
   facility: initialFacility,
+  scenarioId: scenarioId,
 }) => {
   const confirmedCases = totalConfirmedCases(useEpidemicModelState());
   const history = useHistory();
@@ -155,7 +157,7 @@ const FacilityRow: React.FC<Props> = ({
                   // this updates the local state
                   updateFacility({ ...facility, name: newName });
                   // this persists the changes to the database
-                  saveFacility({
+                  saveFacility(scenarioId, {
                     id,
                     name: newName,
                   });

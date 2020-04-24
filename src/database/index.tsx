@@ -165,7 +165,7 @@ export const getSavedState = async (): Promise<EpidemicModelPersistent | null> =
   }
 };
 
-export const getBaselineScenarioRef = async (): Promise<firebase.firestore.DocumentReference | void> => {
+const getBaselineScenarioRef = async (): Promise<firebase.firestore.DocumentReference | void> => {
   const db = await getDb();
 
   // Note: Firestore queries must only return documents that the user has access to. Otherwise, an error will be thrown.
@@ -182,17 +182,34 @@ export const getBaselineScenarioRef = async (): Promise<firebase.firestore.Docum
   return results.docs[0].ref;
 };
 
+const getScenarioRef = async (
+  scenarioId: string,
+): Promise<firebase.firestore.DocumentReference | void> => {
+  try {
+    const db = await getDb();
+
+    const scenarioRef = await db
+      .collection(scenariosCollectionId)
+      .doc(scenarioId);
+
+    return scenarioRef;
+  } catch (error) {
+    console.error(
+      `Encountered error while attempting to retrieve the scenario ref (${scenarioId}):`,
+    );
+    console.error(error);
+  }
+};
+
 export const getScenario = async (
   scenarioId: string,
 ): Promise<Scenario | null> => {
   try {
-    const db = await getDb();
+    const scenarioRef = await getScenarioRef(scenarioId);
 
-    const scenarioResult = await db
-      .collection(scenariosCollectionId)
-      .doc(scenarioId)
-      .get();
+    if (!scenarioRef) return null;
 
+    const scenarioResult = await scenarioRef.get();
     const scenario = scenarioResult.data() as Scenario;
     scenario.id = scenarioResult.id;
 
@@ -324,6 +341,7 @@ export const getFacilities = async (
     const facilities = facilitiesResults.docs.map((doc) => {
       const facility = doc.data() as Facility;
       facility.id = doc.id;
+      facility.scenarioId = scenario.id;
       return facility;
     });
 
@@ -346,6 +364,7 @@ export const getFacilities = async (
  * affecting any other fields:
  *
  * saveFacility({
+     "scenarioId": "<The Scenario's ID>",
  *   "id": "<The Faciliy's ID>",
  *   "name": "Updated Facility Name",
  * });
@@ -357,6 +376,7 @@ export const getFacilities = async (
  * // Don't do this, it will erase all other model input aside from the
  * // ageUnknownCases:
  * saveFacility({
+     "scenarioId": "<The Scenario's ID>",
  *   "id": "<The Faciliy's ID>",
  *   "modelInput": {
  *     "ageUnknownCases": 4
@@ -374,15 +394,14 @@ export const getFacilities = async (
  * Note: It is fine to leave model input values out of modelInputs field
  * if the desired behavior is that those fields are deleted from Firestore.
  */
-export const saveFacility = async (facility: any): Promise<void> => {
+export const saveFacility = async (
+  scenarioId: string,
+  facility: any,
+): Promise<void> => {
   try {
-    // We're cheating here because for the launch we know there is only a
-    // baseline scenario. In subsequent launches, we'll need to pass in
-    // the ID of the specific scenario that we want to save the facility to.
-    // See: https://github.com/Recidiviz/covid19-dashboard/issues/129
-    const baselineScenarioRef = await getBaselineScenarioRef();
+    const scenarioRef = await getScenarioRef(scenarioId);
 
-    if (!baselineScenarioRef) return;
+    if (!scenarioRef) return;
 
     if (facility.modelInputs) {
       // Ensures we don't store any attributres that our model does not
@@ -403,9 +422,7 @@ export const saveFacility = async (facility: any): Promise<void> => {
     const db = await getDb();
     const batch = db.batch();
 
-    const facilitiesCollection = baselineScenarioRef.collection(
-      facilitiesCollectionId,
-    );
+    const facilitiesCollection = scenarioRef.collection(facilitiesCollectionId);
 
     let facilityDoc;
 
