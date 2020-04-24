@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import Loading from "../design-system/Loading";
 import { useLocaleDataState } from "../locale-data-context";
-import { useScenarioState } from "../scenario-context";
+import useScenario from "../scenario-context/useScenario";
 import SiteHeader from "../site-header/SiteHeader";
 import CreateBaselineScenarioPage from "./CreateBaselineScenarioPage";
 import MultiFacilityImpactDashboard from "./MultiFacilityImpactDashboard";
@@ -12,7 +12,7 @@ const MultiFacilityPageDiv = styled.div``;
 
 const MultiFacilityPage: React.FC = () => {
   const localeState = useLocaleDataState();
-  const scenario = useScenarioState();
+  const [scenario] = useScenario();
 
   return (
     <MultiFacilityPageDiv>

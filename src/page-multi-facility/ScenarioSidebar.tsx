@@ -7,6 +7,7 @@ import PromoBoxWithButton from "../design-system/PromoBoxWithButton";
 import useScenario from "../scenario-context/useScenario";
 import ToggleRow from "./ToggleRow";
 import { Scenario } from "./types";
+import { saveScenario } from "../database";
 
 interface Props {
   numFacilities?: number | null;
@@ -51,7 +52,9 @@ const ScenarioSidebar: React.FC<Props> = (props) => {
 
   const handleScenarioChange = (scenarioChange: object) => {
     const changes = Object.assign({}, scenario, scenarioChange);
-    updateScenario(changes);
+    saveScenario(changes).then((_) => {
+      updateScenario(changes);      
+    });
   };
   const [name, setName] = useState(scenario?.name);
   const [promoDismissed, setPromoDismissed] = useState(false);

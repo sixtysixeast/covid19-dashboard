@@ -11,7 +11,6 @@ export default function useScenario() {
   const scenario = useScenarioState();
 
   function updateScenario(scenario: Scenario) {
-    saveScenario(scenario);
     dispatch({
       type: "update",
       payload: {

@@ -8,17 +8,12 @@ import createAuth0Client from "@auth0/auth0-spa-js";
 import { pick } from "lodash";
 
 import config from "../auth/auth_config.json";
-import {
-  EpidemicModelPersistent,
-  persistedKeys,
-} from "../impact-dashboard/EpidemicModelContext";
+import { persistedKeys } from "../impact-dashboard/EpidemicModelContext";
 import { Facility, Scenario } from "../page-multi-facility/types";
-import { prepareForStorage, prepareFromStorage } from "./utils";
 
 // As long as there is just one Auth0 config, this endpoint will work with any environment (local, prod, etc.).
 const tokenExchangeEndpoint =
   "https://us-central1-c19-backend.cloudfunctions.net/getFirebaseToken";
-const modelInputsCollectionId = "model_inputs";
 const scenariosCollectionId = "scenarios_test";
 const facilitiesCollectionId = "facilities";
 const modelVersionCollectionId = "modelVersions";
@@ -118,53 +113,6 @@ const buildUpdatePayload = (entity: any) => {
   return payload;
 };
 
-const getInputModelsDocRef = async () => {
-  const db = await getDb();
-  return db.collection(modelInputsCollectionId).doc(currrentUserId());
-};
-
-// TODO: Guard against the possibility of autosaves completing out of order.
-export const saveState = async (
-  persistedState: EpidemicModelPersistent,
-): Promise<void> => {
-  try {
-    const docRef = await getInputModelsDocRef();
-
-    if (!docRef) return;
-
-    docRef.set({
-      timestamp: currrentTimestamp(),
-      inputs: prepareForStorage(persistedState),
-    });
-  } catch (error) {
-    console.error("Encountered error while attempting to save:");
-    console.error(error);
-  }
-};
-
-export const getSavedState = async (): Promise<EpidemicModelPersistent | null> => {
-  try {
-    const docRef = await getInputModelsDocRef();
-
-    if (!docRef) return null;
-
-    const doc = await docRef.get();
-
-    if (!doc.exists) return null;
-
-    const data = doc.data();
-
-    return !data || !data.inputs ? null : prepareFromStorage(data.inputs);
-  } catch (error) {
-    console.error(
-      "Encountered error while attempting to retrieve saved state:",
-    );
-    console.error(error);
-
-    return null;
-  }
-};
-
 const getBaselineScenarioRef = async (): Promise<firebase.firestore.DocumentReference | void> => {
   const db = await getDb();
 
@@ -180,6 +128,18 @@ const getBaselineScenarioRef = async (): Promise<firebase.firestore.DocumentRefe
   if (results.docs.length === 0) return;
 
   return results.docs[0].ref;
+};
+
+export const getBaselineScenario = async (): Promise<Scenario | null> => {
+  const baselineScenarioRef = await getBaselineScenarioRef();
+
+  if (!baselineScenarioRef) return null;
+
+  const result = await baselineScenarioRef.get();
+  let scenario: Scenario = result.data() as Scenario;
+  scenario.id = baselineScenarioRef.id;
+
+  return scenario;
 };
 
 const getScenarioRef = async (
@@ -224,22 +184,22 @@ export const getScenario = async (
   }
 };
 
-export const saveScenario = async (
-  scenario: any,
-): Promise<firebase.firestore.DocumentReference | void> => {
+export const saveScenario = async (scenario: any): Promise<Scenario | null> => {
   try {
     const db = await getDb();
-    let scenarioDocRef;
+    let scenarioId;
 
     // If the scenario already has an id associated with it then we just need
     // to update that scenario. Otherwise, we are creating a new scenario.
     if (scenario.id) {
-      console.log("Updating: " + scenario.id);
       const payload = buildUpdatePayload(scenario);
-      scenarioDocRef = await db
+
+      await db
         .collection(scenariosCollectionId)
         .doc(scenario.id)
         .update(payload);
+
+      scenarioId = scenario.id;
     } else {
       const userId = currrentUserId();
       const payload = buildCreatePayload(
@@ -252,72 +212,18 @@ export const saveScenario = async (
         }),
       );
 
-      console.log("create payload payload: " + JSON.stringify(payload));
+      const scenarioDocRef = await db
+        .collection(scenariosCollectionId)
+        .add(payload);
 
-      scenarioDocRef = await db.collection(scenariosCollectionId).add(payload);
+      scenarioId = scenarioDocRef.id;
     }
 
-    return scenarioDocRef;
+    return await getScenario(scenarioId);
   } catch (error) {
     console.error("Encountered error while attempting to save a scenario:");
     console.error(error);
-  }
-};
-
-export const getBaselineScenario = async (): Promise<Scenario | null> => {
-  const baselineScenarioRef = await getBaselineScenarioRef();
-
-  if (!baselineScenarioRef) return null;
-
-  const result = await baselineScenarioRef.get();
-  let scenario: Scenario = result.data() as Scenario;
-  scenario.id = baselineScenarioRef.id;
-
-  // NOTE: We should be able to remove this check and save once this issue
-  // is resolved: https://github.com/Recidiviz/covid19-dashboard/issues/186
-  if (scenario && !scenario.hasOwnProperty("promoStatuses")) {
-    scenario = {
-      ...scenario,
-      promoStatuses: {
-        dataSharing: true,
-        dailyReports: true,
-        addFacilities: true,
-      },
-    };
-
-    await saveScenario(scenario);
-  }
-  return scenario;
-};
-
-export const createBaselineScenario = async (): Promise<firebase.firestore.DocumentReference | void> => {
-  try {
-    let baselineScenarioRef = await getBaselineScenarioRef();
-
-    if (baselineScenarioRef) {
-      return baselineScenarioRef;
-    }
-
-    const baselineScenarioDefaults = {
-      name: "Baseline Scenario",
-      baseline: true,
-      dataSharing: false,
-      dailyReports: false,
-      promoStatuses: {
-        dataSharing: true,
-        dailyReports: true,
-        addFacilities: true,
-      },
-      description:
-        "Welcome to your new scenario. To get started, add in facility data on the right-hand side of the page. Your initial scenario is also your 'Baseline' - meaning this is where you should keep real-world numbers about the current state of your facilities, their cases, and mitigation steps.",
-    };
-
-    baselineScenarioRef = await saveScenario(baselineScenarioDefaults);
-
-    return baselineScenarioRef;
-  } catch (error) {
-    console.error("Encountered an error while creating the baseline scenario:");
-    console.error(error);
+    return null;
   }
 };
 

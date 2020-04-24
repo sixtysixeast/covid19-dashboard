@@ -2,12 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 
-import {
-  deleteFacility,
-  getBaselineScenario,
-  getFacilities,
-  saveScenario,
-} from "../database";
+import { deleteFacility, getFacilities, saveScenario } from "../database";
 import Colors from "../design-system/Colors";
 import iconAddSrc from "../design-system/icons/ic_add.svg";
 import Loading from "../design-system/Loading";
