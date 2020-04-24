@@ -247,9 +247,9 @@ export const saveScenario = async (
   }
 };
 
-export const getBaselineScenario = async (
-  baselineScenarioRef: firebase.firestore.DocumentReference | null,
-) => {
+export const getBaselineScenario = async (): Promise<Scenario | null> => {
+  const baselineScenarioRef = await getBaselineScenarioRef();
+
   if (!baselineScenarioRef) return null;
 
   const result = await baselineScenarioRef.get();

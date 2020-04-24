@@ -13,9 +13,9 @@ import iconAddSrc from "../design-system/icons/ic_add.svg";
 import Loading from "../design-system/Loading";
 import { EpidemicModelProvider } from "../impact-dashboard/EpidemicModelContext";
 import { useLocaleDataState } from "../locale-data-context";
+import useScenario from "../scenario-context/useScenario";
 import { FacilityContext } from "./FacilityContext";
 import FacilityRow from "./FacilityRow";
-import { BaselineScenarioRef } from "./MultiFacilityPage";
 import ProjectionsHeader from "./ProjectionsHeader";
 import ScenarioSidebar from "./ScenarioSidebar";
 import { Facilities, Scenario } from "./types";
@@ -26,10 +26,6 @@ const MultiFacilityImpactDashboardContainer = styled.main.attrs({
     mt-8
   `,
 })``;
-
-interface Props {
-  baselineScenarioRef?: BaselineScenarioRef;
-}
 
 const AddFacilityButton = styled.button`
   color: ${Colors.forest};
@@ -51,10 +47,10 @@ const AddFacilityButtonText = styled.span`
   vertical-align: middle;
 `;
 
-const MultiFacilityImpactDashboard: React.FC<Props> = ({
-  baselineScenarioRef,
-}) => {
+const MultiFacilityImpactDashboard: React.FC = () => {
   const { data: localeDataSource } = useLocaleDataState();
+  const [scenario] = useScenario();
+
   const history = useHistory();
   const { setFacility } = useContext(FacilityContext);
 
@@ -62,30 +58,6 @@ const MultiFacilityImpactDashboard: React.FC<Props> = ({
     data: [] as Facilities,
     loading: true,
   });
-
-  const [scenario, setScenario] = useState<{
-    data: Scenario | null;
-    loading: boolean;
-  }>({
-    data: null,
-    loading: true,
-  });
-
-  const updateScenario = async (scenario: Scenario) => {
-    await saveScenario(scenario);
-    setScenario({ data: scenario, loading: false });
-  };
-
-  useEffect(() => {
-    async function fetchScenario() {
-      const scenario = await getBaselineScenario(baselineScenarioRef?.data);
-      setScenario({
-        data: scenario,
-        loading: false,
-      });
-    }
-    fetchScenario();
-  }, []);
 
   async function fetchFacilities() {
     if (!scenario?.data?.id) return;
@@ -119,11 +91,7 @@ const MultiFacilityImpactDashboard: React.FC<Props> = ({
       {scenario.loading ? (
         <Loading />
       ) : (
-        <ScenarioSidebar
-          numFacilities={facilities?.data.length}
-          scenario={scenario.data}
-          updateScenario={updateScenario}
-        />
+        <ScenarioSidebar numFacilities={facilities?.data.length} />
       )}
       <div className="flex flex-col flex-1 pb-6 pl-8">
         <AddFacilityButton onClick={openAddFacilityPage}>
