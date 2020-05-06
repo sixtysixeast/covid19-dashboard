@@ -6,7 +6,7 @@ import "firebase/firestore";
 
 import createAuth0Client from "@auth0/auth0-spa-js";
 import { format, startOfDay, startOfToday } from "date-fns";
-import { pick, sortBy } from "lodash";
+import { pick, orderBy } from "lodash";
 
 import config from "../auth/auth_config.json";
 import { MMMMdyyyy } from "../constants";
@@ -21,7 +21,7 @@ import {
 // As long as there is just one Auth0 config, this endpoint will work with any environment (local, prod, etc.).
 const tokenExchangeEndpoint =
   "https://us-central1-c19-backend.cloudfunctions.net/getFirebaseToken";
-const scenariosCollectionId = "scenarios";
+const scenariosCollectionId = "scenarios_test";
 const facilitiesCollectionId = "facilities";
 const modelVersionCollectionId = "modelVersions";
 
@@ -204,7 +204,7 @@ export const getScenarios = async (): Promise<Scenario[]> => {
     // We're sorting in memory instead of in the query above due to a limitation
     // in the way our data is currently modeled. See this issue for more details:
     // https://github.com/Recidiviz/covid19-dashboard/issues/253
-    return sortBy(scenarios, "name");
+    return orderBy(scenarios, ["baseline", "name"], ["desc", "asc"]);
   } catch (error) {
     console.error(`Encountered error while attempting to retrieve scenarios:`);
     console.error(error);

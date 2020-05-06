@@ -14,9 +14,19 @@ import { useFlag } from "../feature-flags";
 import useScenario from "../scenario-context/useScenario";
 import ToggleRow from "./ToggleRow";
 import { Scenario } from "./types";
+import ScenarioLibraryModal from "./ScenarioLibraryModal";
+import iconFolderSrc from "../design-system/icons/ic_folder.svg";
+
 
 const HorizontalRule = styled.hr`
   border-color: ${Colors.opacityGray};
+`;
+
+const IconFolder = styled.img`
+  display: inline;
+  width: 12px;
+  height: 12px;
+  margin-right: 12px;
 `;
 
 interface Props {
@@ -94,6 +104,9 @@ const ScenarioSidebar: React.FC<Props> = (props) => {
   return (
     <div className="flex flex-col w-1/4 mr-24">
       <div className="flex-1 flex flex-col pb-4">
+        <ScenarioLibraryModal
+          trigger={<IconFolder alt="folder" src={iconFolderSrc} />}
+        />
         <InputNameWithIcon
           name={name}
           setName={setName}
@@ -102,7 +115,6 @@ const ScenarioSidebar: React.FC<Props> = (props) => {
           maxLengthValue={124}
           requiredFlag={true}
           persistChanges={handleTextInputChange}
-          showIcon
         />
         <Spacer y={20} />
         <InputDescription
