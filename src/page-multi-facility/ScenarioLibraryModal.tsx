@@ -2,20 +2,25 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import Colors, { MarkColors as markColors } from "../design-system/Colors";
+import { DateMMMMdyyyy } from "../design-system/DateFormats";
 import FontSizes from "../design-system/FontSizes";
+import { StyledButton } from "../design-system/InputButton";
 import Loading from "../design-system/Loading";
 import Modal, { Props as ModalProps } from "../design-system/Modal";
 import PopUpMenu from "../design-system/PopUpMenu";
 import iconSrcCheck from "../design-system/icons/ic_check.svg";
 
-import { getScenarios } from "../database";
+import useScenario from "../scenario-context/useScenario";
+import {
+  duplicateScenario,
+  getScenarios
+} from "../database";
 import { Scenario } from "./types";
 import CurveChart from "../impact-dashboard/CurveChart";
 
 type Props = Pick<ModalProps, "trigger">;
 
 const ModalContents = styled.div`
-  align-items: flex-start;
   display: flex;
   flex-direction: column;
   font-weight: normal;
@@ -30,6 +35,9 @@ const ScenarioLibrary = styled.div`
 `;
 
 const ScenarioCard = styled.div`
+  display: inline;
+  border: 1px solid ${Colors.darkGray};
+  border-radius: 0.25em;
   cursor: pointer;
   height: 330px;
   margin-bottom: 25px;
@@ -55,9 +63,11 @@ const ScenarioHeaderText = styled.h1`
 `;
 
 const ScenarioDataViz = styled.div`
+  color ${Colors.opacityGray};
   display: flex;
   height: 45%;
-  border: 1px dotted red;
+  border: 3px dashed ${Colors.opacityGray};
+  background-color: ${Colors.paleGreen};
 `;
 
 const ScenarioDescription = styled.div`
@@ -102,23 +112,31 @@ const IconCheck = styled.img<IconCheckProps>`
 `;
 
 const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
-  function duplicate(this: Scenario) {
-    alert("duplicated!" + this.id);
-  };
-
-  function openDeleteModal(this: Scenario) {
-    alert("deleted!" + this.id);
-  };
-
   const [modalOpen, setModalOpen] = useState(false);
+  const [_, dispatchScenarioUpdate] = useScenario();
   const [scenarios, setScenarios] = useState({
     data: [] as Scenario[],
     loading: true,
   });
 
+  const copyScenario = (scenarioId: string) => {
+    setScenarios({
+      data: [],
+      loading: true
+    });
+
+    duplicateScenario(scenarioId).then(() => {
+      fetchScenarios();
+    });
+  }
+
+  const changeScenario = (scenario: Scenario) => {
+    dispatchScenarioUpdate(scenario);
+    setModalOpen(false);
+  }
+
   async function fetchScenarios() {
     const scenariosData = await getScenarios();
-
     if (scenariosData) {
       setScenarios({
         data: scenariosData,
@@ -146,12 +164,12 @@ const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
           ) : (
             scenarios?.data.map((scenario) => {
               const popupItems = [
-                { name: "Duplicate", onClick: duplicate.bind(scenario) },
-                { name: "Delete", onClick: openDeleteModal.bind(scenario) }
+                { name: "Duplicate", onClick: () => copyScenario(scenario.id) },
               ];
 
               return (
-                <ScenarioCard key={scenario.id} className="border border-gray-500 rounded">
+                // <ScenarioCard key={scenario.id} onClick={() => changeScenario(scenario)}>
+                <ScenarioCard key={scenario.id}>
                   <ScenarioHeader>
                     <IconCheck alt="check" src={iconSrcCheck} baseline={scenario.baseline} />
                     <ScenarioHeaderText>{scenario.name}</ScenarioHeaderText>
@@ -163,7 +181,7 @@ const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
                     {scenario.description}                  
                   </ScenarioDescription>
                   <ScenarioFooter>
-                    <LastUpdatedLabel>Last Updated: December 29, 2020</LastUpdatedLabel>
+                    <LastUpdatedLabel>Last Update: <DateMMMMdyyyy date={scenario.updatedAt} /></LastUpdatedLabel>
                     <PopUpMenu items={popupItems} />
                   </ScenarioFooter>
                 </ScenarioCard>
