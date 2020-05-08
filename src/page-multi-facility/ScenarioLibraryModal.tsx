@@ -1,22 +1,16 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import Colors, { MarkColors as markColors } from "../design-system/Colors";
+import { duplicateScenario, getScenarios } from "../database";
+import Colors from "../design-system/Colors";
 import { DateMMMMdyyyy } from "../design-system/DateFormats";
-import FontSizes from "../design-system/FontSizes";
-import { StyledButton } from "../design-system/InputButton";
+import iconSrcCheck from "../design-system/icons/ic_check.svg";
+import iconSrcRecidiviz from "../design-system/icons/ic_recidiviz.svg";
 import Loading from "../design-system/Loading";
 import Modal, { Props as ModalProps } from "../design-system/Modal";
 import PopUpMenu from "../design-system/PopUpMenu";
-import iconSrcCheck from "../design-system/icons/ic_check.svg";
-
 import useScenario from "../scenario-context/useScenario";
-import {
-  duplicateScenario,
-  getScenarios
-} from "../database";
 import { Scenario } from "./types";
-import CurveChart from "../impact-dashboard/CurveChart";
 
 type Props = Pick<ModalProps, "trigger">;
 
@@ -41,14 +35,14 @@ const ScenarioCard = styled.div`
   border: 1px solid ${Colors.darkGray};
   border-radius: 0.25em;
   cursor: pointer;
-  height: 330px;
   margin-bottom: 25px;
+  height: 330px;
   width: 330px;
 `;
 
 const ScenarioHeader = styled.div`
   display: flex;
-  padding: 1.5rem 1rem .25rem 1rem;
+  padding: 1.5rem 1rem 0.25rem 1rem;
 `;
 
 const ScenarioHeaderText = styled.h1`
@@ -60,7 +54,7 @@ const ScenarioHeaderText = styled.h1`
   text-align: left;
   padding-bottom: 0.75rem;
   overflow: hidden;
-  text-overflow: ellipsis; 
+  text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
@@ -68,8 +62,7 @@ const ScenarioDataViz = styled.div`
   color ${Colors.opacityGray};
   display: flex;
   height: 45%;
-  border: 3px dashed ${Colors.opacityGray};
-  background-color: ${Colors.paleGreen};
+  background-color: ${Colors.gray};
 `;
 
 const ScenarioDescription = styled.div`
@@ -84,13 +77,13 @@ const ScenarioDescription = styled.div`
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;  
+  -webkit-box-orient: vertical;
 `;
 
 const ScenarioFooter = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 1.75rem 1rem .25rem 1rem;
+  padding: 1.75rem 1rem 0.25rem 1rem;
 `;
 
 const LastUpdatedLabel = styled.div`
@@ -107,10 +100,16 @@ interface IconCheckProps {
 }
 
 const IconCheck = styled.img<IconCheckProps>`
-  display: ${props => props.baseline ? "inline" : "none"};
+  display: ${(props) => (props.baseline ? "inline" : "none")};
   width: 20px;
   height: 20px;
   margin-right: 8px;
+`;
+
+const IconRecidviz = styled.img`
+  width: 50px;
+  height: 50px;
+  margin: auto;
 `;
 
 const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
@@ -120,22 +119,6 @@ const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
     data: [] as Scenario[],
     loading: true,
   });
-
-  const copyScenario = (scenarioId: string) => {
-    setScenarios({
-      data: [],
-      loading: true
-    });
-
-    duplicateScenario(scenarioId).then(() => {
-      fetchScenarios();
-    });
-  }
-
-  const changeScenario = (scenario: Scenario) => {
-    dispatchScenarioUpdate(scenario);
-    setModalOpen(false);
-  }
 
   async function fetchScenarios() {
     const scenariosData = await getScenarios();
@@ -150,6 +133,22 @@ const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
   useEffect(() => {
     fetchScenarios();
   }, []);
+
+  const copyScenario = (scenarioId: string) => {
+    setScenarios({
+      data: [],
+      loading: true,
+    });
+
+    duplicateScenario(scenarioId).then(() => {
+      fetchScenarios();
+    });
+  };
+
+  const changeScenario = (scenario: Scenario) => {
+    dispatchScenarioUpdate(scenario);
+    setModalOpen(false);
+  };
 
   return (
     <Modal
@@ -171,20 +170,28 @@ const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
               ];
 
               return (
-                // <ScenarioCard key={scenario.id}>
-                <ScenarioCard key={scenario.id} onClick={() => changeScenario(scenario)}>
+                <ScenarioCard
+                  key={scenario.id}
+                  onClick={() => changeScenario(scenario)}
+                >
                   <ScenarioHeader>
-                    <IconCheck alt="check" src={iconSrcCheck} baseline={scenario.baseline} />
+                    <IconCheck
+                      alt="check"
+                      src={iconSrcCheck}
+                      baseline={scenario.baseline}
+                    />
                     <ScenarioHeaderText>{scenario.name}</ScenarioHeaderText>
                   </ScenarioHeader>
                   <ScenarioDataViz>
-                    <div className="m-auto">DATA VIZ GOES HERE</div>
+                    <IconRecidviz alt="Recidiviz" src={iconSrcRecidiviz} />
                   </ScenarioDataViz>
                   <ScenarioDescription>
-                    {scenario.description}                  
+                    {scenario.description}
                   </ScenarioDescription>
                   <ScenarioFooter>
-                    <LastUpdatedLabel>Last Update: <DateMMMMdyyyy date={scenario.updatedAt} /></LastUpdatedLabel>
+                    <LastUpdatedLabel>
+                      Last Update: <DateMMMMdyyyy date={scenario.updatedAt} />
+                    </LastUpdatedLabel>
                     <PopUpMenu items={popupItems} />
                   </ScenarioFooter>
                 </ScenarioCard>

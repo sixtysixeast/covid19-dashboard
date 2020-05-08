@@ -1,10 +1,11 @@
 import { format } from "date-fns";
 import { navigate } from "gatsby";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 import { saveScenario } from "../database";
 import Colors from "../design-system/Colors";
+import iconFolderSrc from "../design-system/icons/ic_folder.svg";
 import InputButton from "../design-system/InputButton";
 import InputDescription from "../design-system/InputDescription";
 import InputNameWithIcon from "../design-system/InputNameWithIcon";
@@ -12,11 +13,9 @@ import PromoBoxWithButton from "../design-system/PromoBoxWithButton";
 import { Spacer } from "../design-system/Spacer";
 import { useFlag } from "../feature-flags";
 import useScenario from "../scenario-context/useScenario";
+import ScenarioLibraryModal from "./ScenarioLibraryModal";
 import ToggleRow from "./ToggleRow";
 import { Scenario } from "./types";
-import ScenarioLibraryModal from "./ScenarioLibraryModal";
-import iconFolderSrc from "../design-system/icons/ic_folder.svg";
-
 
 const HorizontalRule = styled.hr`
   border-color: ${Colors.opacityGray};
@@ -30,11 +29,11 @@ const IconFolder = styled.img`
 `;
 
 interface ToggleContainerProps {
-  hidden?: boolean
+  hidden?: boolean;
 }
 
 const ToggleContainer = styled.div<ToggleContainerProps>`
-  visibility: ${props => props.hidden ? "hidden" : "visibile" };
+  visibility: ${(props) => (props.hidden ? "hidden" : "visibile")};
 `;
 
 interface Props {
@@ -85,6 +84,7 @@ const ScenarioSidebar: React.FC<Props> = (props) => {
   const { numFacilities } = props;
   const updatedAtDate = Number(scenario?.updatedAt);
   const showImpactButton = useFlag(["showImpactButton"]);
+  const showScenarioLibrary = useFlag(["showScenarioLibrary"]);
 
   const handleScenarioChange = (scenarioChange: any) => {
     const changes = Object.assign({}, scenario, scenarioChange);
@@ -112,9 +112,11 @@ const ScenarioSidebar: React.FC<Props> = (props) => {
   return (
     <div className="flex flex-col w-1/4 mr-24">
       <div className="flex-1 flex flex-col pb-4">
-        <ScenarioLibraryModal
-          trigger={<IconFolder alt="folder" src={iconFolderSrc} />}
-        />
+        {showScenarioLibrary && (
+          <ScenarioLibraryModal
+            trigger={<IconFolder alt="folder" src={iconFolderSrc} />}
+          />
+        )}
         <InputNameWithIcon
           name={name}
           setName={setName}
@@ -123,6 +125,7 @@ const ScenarioSidebar: React.FC<Props> = (props) => {
           maxLengthValue={124}
           requiredFlag={true}
           persistChanges={handleTextInputChange}
+          showIcon
         />
         <Spacer y={20} />
         <InputDescription
@@ -188,6 +191,8 @@ const ScenarioSidebar: React.FC<Props> = (props) => {
                 fontSize: "14px",
                 fontFamily: "PingFang SC",
                 width: "100%",
+                marginTop: "20px",
+                visibility: !scenario?.baseline ? "hidden" : "visible",
               }}
               label="Generate Impact Report"
               onClick={() => navigate("/impact")}
