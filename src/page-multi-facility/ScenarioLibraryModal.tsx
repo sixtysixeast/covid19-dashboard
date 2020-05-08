@@ -171,8 +171,8 @@ const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
               ];
 
               return (
-                // <ScenarioCard key={scenario.id} onClick={() => changeScenario(scenario)}>
-                <ScenarioCard key={scenario.id}>
+                // <ScenarioCard key={scenario.id}>
+                <ScenarioCard key={scenario.id} onClick={() => changeScenario(scenario)}>
                   <ScenarioHeader>
                     <IconCheck alt="check" src={iconSrcCheck} baseline={scenario.baseline} />
                     <ScenarioHeaderText>{scenario.name}</ScenarioHeaderText>
