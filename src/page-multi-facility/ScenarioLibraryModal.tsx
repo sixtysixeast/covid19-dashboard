@@ -26,12 +26,14 @@ const ModalContents = styled.div`
   font-weight: normal;
   justify-content: flex-start;
   margin-top: 30px;
+  height: 100%;
 `;
 
 const ScenarioLibrary = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  height: 100%;
 `;
 
 const ScenarioCard = styled.div`
@@ -155,7 +157,8 @@ const ScenarioLibraryModal: React.FC<Props> = ({ trigger }) => {
       open={modalOpen}
       setOpen={setModalOpen}
       trigger={trigger}
-      vw="45vw"
+      height="90vh"
+      width="45vw"
     >
       <ModalContents>
         <ScenarioLibrary>
