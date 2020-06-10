@@ -102,7 +102,18 @@ const getDb = async () => {
     throw new Error("Firebase user unexpectedly not set");
   }
 
-  return firebase.firestore();
+  const db = firebase.firestore();
+
+  console.log("location.hostname: " + location.hostname);
+
+  if (location.hostname === "localhost") {
+    db.settings({
+      host: "localhost:8080",
+      ssl: false
+    });
+  }  
+
+  return db;
 };
 
 const buildCreatePayload = (entity: any) => {

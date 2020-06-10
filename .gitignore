@@ -38,3 +38,5 @@
 
 # Vercel Now
 /.now
+
+*.log
